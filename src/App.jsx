@@ -1,4 +1,6 @@
 import './App.css'
+import rotationIqImage from './assets/rotationIQ.png'
+import helpdeskImage from './assets/helpdesk.png'
 
 const skills = [
   {
@@ -18,19 +20,19 @@ const skills = [
 const projects = [
   {
     name: 'RotationIQ',
-    type: 'AI-powered rotation tool',
+    type: 'Volleyball rotation tool',
     description:
       'A volleyball rotation web program that helps teams organize player positions and manage rotation logic.',
-    stack: ['Python', 'JavaScript', 'AI Logic', 'Web App'],
+    stack: ['Python', 'JavaScript', 'Logic', 'Web App'],
     link: 'https://github.com/chapaXD01/RotationIQ',
   },
   {
-    name: 'Weather',
-    type: 'Weather app',
+    name: 'Helpdesk',
+    type: 'Support desk',
     description:
-      'A clean weather dashboard that shows live conditions and helps users track weather updates quickly and clearly.',
-    stack: ['React', 'API', 'UI Design', 'JavaScript'],
-    link: 'https://github.com/chapaXD01/weather',
+      'A modern support desk web app that helps teams manage tickets, track issues, and organize support requests efficiently.',
+    stack: ['React', 'Ticketing', 'Dashboard', 'Support'],
+    link: 'https://github.com/chapaXD01',
   },
 ]
 
@@ -184,6 +186,21 @@ function App() {
                   </a>
                 </h3>
                 <p>{project.description}</p>
+
+                {project.name === 'RotationIQ' ? (
+                  <img
+                    className="project-image"
+                    src={rotationIqImage}
+                    alt="RotationIQ project preview"
+                  />
+                ) : project.name === 'Helpdesk' ? (
+                  <img
+                    className="project-image"
+                    src={helpdeskImage}
+                    alt="Helpdesk project preview"
+                  />
+                ) : null}
+
                 <div className="stack-row">
                   {project.stack.map((tech) => (
                     <span key={tech}>{tech}</span>
@@ -203,8 +220,11 @@ function App() {
         </div>
 
         <div className="footer-actions">
-          <a className="primary-btn" href="mailto:ipb23.r.petersons@vtdt.edu.lv">
-            ipb23.r.petersons@vtdt.edu.lv
+          <a className="primary-btn" href="mailto:petersonsrenars0@gmail.com">
+            petersonsrenars0@gmail.com
+          </a>
+          <a className="secondary-btn" href="tel:+37125691978">
+            +371 25691978
           </a>
           <div className="socials" aria-label="social links">
             {socials.map((social) => (
