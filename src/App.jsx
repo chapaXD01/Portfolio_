@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import rotationIqImage from './assets/rotationIQ.png'
 import helpdeskImage from './assets/helpdesk.png'
@@ -24,7 +25,7 @@ const projects = [
     description:
       'A volleyball rotation web program that helps teams organize player positions and manage rotation logic.',
     stack: ['Python', 'JavaScript', 'Logic', 'Web App'],
-    link: 'https://github.com/chapaXD01/RotationIQ',
+    link: 'https://github.com/chapaXD01/RotationIQ-kvalifikacija',
   },
   {
     name: 'Helpdesk',
@@ -40,20 +41,132 @@ const socials = [
   { label: 'GitHub', href: 'https://github.com/chapaXD01' },
 ]
 
+const navLinks = [
+  { id: 'about', label: 'About' },
+  { id: 'skills', label: 'Skills' },
+  { id: 'projects', label: 'Projects' },
+  { id: 'contact', label: 'Contact' },
+]
+
+function useRevealOnScroll() {
+  useEffect(() => {
+    const targets = document.querySelectorAll('.reveal')
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible')
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -60px 0px' },
+    )
+
+    targets.forEach((target) => observer.observe(target))
+    return () => observer.disconnect()
+  }, [])
+}
+
 function App() {
+  const [activeSection, setActiveSection] = useState('')
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [showBackToTop, setShowBackToTop] = useState(false)
+  const [scrollProgress, setScrollProgress] = useState(0)
+  const tiltRefs = useRef(new Map())
+
+  useRevealOnScroll()
+
+  useEffect(() => {
+    const sections = navLinks
+      .map((link) => document.getElementById(link.id))
+      .filter(Boolean)
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id)
+          }
+        })
+      },
+      { rootMargin: '-45% 0px -45% 0px' },
+    )
+
+    sections.forEach((section) => observer.observe(section))
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const onScroll = () => {
+      const scrollTop = window.scrollY
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight
+      setShowBackToTop(scrollTop > 480)
+      setScrollProgress(docHeight > 0 ? (scrollTop / docHeight) * 100 : 0)
+    }
+
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  const handleTiltMove = (key) => (event) => {
+    const card = tiltRefs.current.get(key)
+    if (!card) return
+    const rect = card.getBoundingClientRect()
+    const x = (event.clientX - rect.left) / rect.width - 0.5
+    const y = (event.clientY - rect.top) / rect.height - 0.5
+    card.style.setProperty('--tilt-x', `${(-y * 8).toFixed(2)}deg`)
+    card.style.setProperty('--tilt-y', `${(x * 8).toFixed(2)}deg`)
+    card.style.setProperty('--glow-x', `${(x + 0.5) * 100}%`)
+    card.style.setProperty('--glow-y', `${(y + 0.5) * 100}%`)
+  }
+
+  const handleTiltLeave = (key) => () => {
+    const card = tiltRefs.current.get(key)
+    if (!card) return
+    card.style.setProperty('--tilt-x', '0deg')
+    card.style.setProperty('--tilt-y', '0deg')
+  }
+
+  const registerTiltRef = (key) => (node) => {
+    if (node) tiltRefs.current.set(key, node)
+    else tiltRefs.current.delete(key)
+  }
+
   return (
     <div className="page-shell">
+      <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} />
+
       <header className="topbar">
         <div className="brand" aria-label="Renārs Pētersons">
           <span className="brand-mark">R</span>
           <span>Renārs Pētersons</span>
         </div>
 
-        <nav className="nav" aria-label="Main navigation">
-          <a href="#about">About</a>
-          <a href="#skills">Skills</a>
-          <a href="#projects">Projects</a>
-          <a href="#contact">Contact</a>
+        <button
+          type="button"
+          className={`nav-toggle ${menuOpen ? 'is-open' : ''}`}
+          aria-label="Toggle navigation menu"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+
+        <nav className={`nav ${menuOpen ? 'is-open' : ''}`} aria-label="Main navigation">
+          {navLinks.map((link) => (
+            <a
+              key={link.id}
+              href={`#${link.id}`}
+              className={activeSection === link.id ? 'is-active' : ''}
+              onClick={() => setMenuOpen(false)}
+            >
+              {link.label}
+            </a>
+          ))}
         </nav>
       </header>
 
@@ -97,9 +210,15 @@ function App() {
             </div>
           </div>
 
-          <div className="hero-panel" aria-label="Developer profile card">
+          <div
+            className="hero-panel"
+            aria-label="Developer profile card"
+            ref={registerTiltRef('hero')}
+            onMouseMove={handleTiltMove('hero')}
+            onMouseLeave={handleTiltLeave('hero')}
+          >
             <div className="profile-card">
-              <div className="avatar">AC</div>
+              <div className="avatar">RP</div>
               <div>
                 <p className="profile-label">Developer profile</p>
                 <h2>Renārs Pētersons</h2>
@@ -127,7 +246,7 @@ function App() {
           </div>
         </section>
 
-        <section id="about" className="section about">
+        <section id="about" className="section about reveal">
           <div className="section-heading">
             <span className="eyebrow">About me</span>
             <h2>Turning logic into memorable user experiences.</h2>
@@ -157,8 +276,15 @@ function App() {
           </div>
 
           <div className="skills-grid">
-            {skills.map((group) => (
-              <div key={group.title} className="skill-card">
+            {skills.map((group, index) => (
+              <div
+                key={group.title}
+                className="skill-card reveal"
+                style={{ '--reveal-delay': `${index * 90}ms` }}
+                ref={registerTiltRef(`skill-${group.title}`)}
+                onMouseMove={handleTiltMove(`skill-${group.title}`)}
+                onMouseLeave={handleTiltLeave(`skill-${group.title}`)}
+              >
                 <h3>{group.title}</h3>
                 <ul>
                   {group.items.map((item) => (
@@ -177,8 +303,15 @@ function App() {
           </div>
 
           <div className="projects-grid">
-            {projects.map((project) => (
-              <article key={project.name} className="project-card">
+            {projects.map((project, index) => (
+              <article
+                key={project.name}
+                className="project-card reveal"
+                style={{ '--reveal-delay': `${index * 90}ms` }}
+                ref={registerTiltRef(`project-${project.name}`)}
+                onMouseMove={handleTiltMove(`project-${project.name}`)}
+                onMouseLeave={handleTiltLeave(`project-${project.name}`)}
+              >
                 <div className="project-tag">{project.type}</div>
                 <h3>
                   <a href={project.link} target="_blank" rel="noreferrer">
@@ -213,7 +346,7 @@ function App() {
 
       </main>
 
-      <footer id="contact" className="footer section">
+      <footer id="contact" className="footer section reveal">
         <div>
           <span className="eyebrow">Let’s work together</span>
           <h2>Open to internship opportunities.</h2>
@@ -235,6 +368,15 @@ function App() {
           </div>
         </div>
       </footer>
+
+      <button
+        type="button"
+        className={`back-to-top ${showBackToTop ? 'is-visible' : ''}`}
+        aria-label="Back to top"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      >
+        ↑
+      </button>
     </div>
   )
 }
