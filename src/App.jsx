@@ -175,7 +175,7 @@ function App() {
           <div className="hero-copy">
             <span className="eyebrow">Available for internship</span>
             <h1>
-              I build ideas into <span>smart digital products</span>.
+              I build <span>practical web applications</span> that work.
             </h1>
             <p className="lead">
               I’m a motivated and enthusiastic developer with a strong interest in web
